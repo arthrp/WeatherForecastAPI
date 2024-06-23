@@ -7,6 +7,7 @@ public class Program
     public static async Task Main(string[] args)
     {
         var builder = WebApplication.CreateBuilder(args);
+        var refreshInterval = int.Parse(builder.Configuration["RefreshIntervalSeconds"] ?? "3");
 
         // Add services to the container.
         builder.Services.AddAuthorization();
@@ -23,7 +24,8 @@ public class Program
         builder.Services.AddQuartz(q =>
         {
             q.UseSimpleTypeLoader();
-            q.ScheduleJob<WeatherUpdateJob>(opts => opts.WithSimpleSchedule(x => x.WithIntervalInSeconds(3).RepeatForever()), opt => opt.StoreDurably());
+            q.ScheduleJob<WeatherUpdateJob>(opts => opts.WithSimpleSchedule(x => 
+                x.WithIntervalInSeconds(refreshInterval).RepeatForever()), opt => opt.StoreDurably());
         });
         builder.Services.AddQuartzHostedService(q => q.WaitForJobsToComplete = false);
 
